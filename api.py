@@ -64,7 +64,8 @@ def generate_page(json_info):
         f.close()
         return {'ok': True, 'url': 'https://asergey.me/iv/{}.html'.format(page),
                 'iv_url': 'https://t.me/iv?url=https://asergey.me/iv/{}.html&rhash=610fa9e72e9e1a'.format(page)}
-    except:
+    except Exception as e:
+        print(e)
         return flask.abort(500)
 
 

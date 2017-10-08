@@ -1,3 +1,3 @@
 import os
 
-iv_path = os.path.join('', 'home', 'pi', 'iv', '')
+iv_path = os.path.expanduser(os.path.join('~','iv', ''))
