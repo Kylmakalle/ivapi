@@ -1,13 +1,15 @@
 import flask
-from urllib.parse import quote_plus
+import time
 from flask import request, Response, jsonify
 import json
 import uuid
-from yattag import Doc
+from yattag import Doc, indent
 
 from credentials import iv_path
 
 app = flask.Flask(__name__)
+
+TIMINGS = {}
 
 
 def checkJson(s):
@@ -15,6 +17,16 @@ def checkJson(s):
         return json.loads(s)
     except:
         return False
+
+
+def timing_ok(ip):
+    now = time.time()
+    if TIMINGS.get(ip):
+        if now < TIMINGS[ip] + 0.05:
+            return False
+
+    TIMINGS[ip] = now
+    return True
 
 
 def checkattrs(info):
@@ -40,7 +52,7 @@ def checkattrs(info):
 def generate_page(json_info):
     try:
         page = str(uuid.uuid4().hex)
-        doc, tag, text = Doc().tagtext()
+        doc, tag, text, line = Doc().ttl()
         with tag('html'):
             with tag('body'):
                 with tag('article'):
@@ -59,9 +71,10 @@ def generate_page(json_info):
                                             text(photo['caption'])
                     if json_info.get('audios'):
                         for audio in json_info['audios']:
-                            doc.stag('audio', src=audio['url'])
+                            with tag('audio', src=audio['url']):
+                                pass
         f = open(iv_path + '{}.html'.format(page), mode='w')
-        f.write(doc.getvalue())
+        f.write(indent(doc.getvalue()))
         f.close()
         return {'ok': True, 'url': 'https://asergey.me/iv/{}.html'.format(page),
                 'iv_url': 'https://t.me/iv?url=https%3A%2F%2Fasergey.me%2Fiv%2F{}.html&rhash=610fa9e72e9e1a'.format(
@@ -80,16 +93,19 @@ def custom_401():
 def post_request():
     if request.headers.get('content-type') == 'application/json':
         if True:  # request.headers.get('Bearer'):
-            info = request.get_data().decode('utf-8')
-            json_info = checkJson(info)
-            if json_info:
-                if checkattrs(json_info):
-                    return jsonify(generate_page(json_info))
+            if timing_ok(request.environ.get('HTTP_X_FORWARDED_FOR')):
+                info = request.get_data().decode('utf-8')
+                json_info = checkJson(info)
+                if json_info:
+                    if checkattrs(json_info):
+
+                        return jsonify(generate_page(json_info))
+                    else:
+                        flask.abort(400)
                 else:
                     flask.abort(400)
             else:
-                flask.abort(400)
-
+                flask.abort(429)
         else:
             flask.abort(401)
     else:
