@@ -19,13 +19,13 @@ def checkJson(s):
 
 def checkattrs(info):
     if info.get('title'):
-        if info.get('photos') and isinstance(info['photos'], tuple):
+        if info.get('photos') and isinstance(info['photos'], list):
             for photo in info['photos']:
                 if photo.get('url'):
                     continue
                 else:
                     return False  # missing photo url
-        elif info.get('audios') and isinstance(info['audios'], tuple):
+        elif info.get('audios') and isinstance(info['audios'], list):
             for audio in info['audios']:
                 if audio.get('url'):
                     continue
@@ -80,9 +80,9 @@ def post_request():
                 if checkattrs(json_info):
                     return generate_page(json_info)
                 else:
-                    flask.abort(403)
+                    flask.abort(400)
             else:
-                flask.abort(403)
+                flask.abort(400)
 
         else:
             flask.abort(401)
