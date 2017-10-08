@@ -1,4 +1,5 @@
 import flask
+from urllib.parse import urlencode
 from flask import request, Response, jsonify
 import json
 import uuid
@@ -63,7 +64,9 @@ def generate_page(json_info):
         f.write(doc.getvalue())
         f.close()
         return {'ok': True, 'url': 'https://asergey.me/iv/{}.html'.format(page),
-                'iv_url': 'https://t.me/iv?url=https://asergey.me/iv/{}.html&rhash=610fa9e72e9e1a'.format(page)}
+                'iv_url':
+                    'https://t.me/iv?url={}'.format(
+                        urlencode('https://asergey.me/iv/{}.html&rhash=610fa9e72e9e1a'.format(page)))}
     except Exception as e:
         print(e)
         return flask.abort(500)
