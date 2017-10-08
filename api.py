@@ -72,7 +72,7 @@ def generate_page(json_info):
                     if json_info.get('audios'):
                         for audio in json_info['audios']:
                             with tag('audio', src=audio['url']):
-                                text(' ')  # IV support
+                                doc.stag('article')  # IV support
         f = open(iv_path + '{}.html'.format(page), mode='w')
         f.write(indent(doc.getvalue()))
         f.close()
