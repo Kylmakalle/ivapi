@@ -1,7 +1,6 @@
 import flask
 from flask import request, Response
 import json
-import os
 import uuid
 from yattag import Doc
 
@@ -25,7 +24,7 @@ def checkattrs(info):
                     continue
                 else:
                     return False  # missing photo url
-        elif info.get('audios') and isinstance(info['audios'], list):
+        if info.get('audios') and isinstance(info['audios'], list):
             for audio in info['audios']:
                 if audio.get('url'):
                     continue
@@ -33,36 +32,40 @@ def checkattrs(info):
                     return False  # missing audio url
         else:
             return False  # missing data
-            # missing Title
+        return True
+        # missing Title
 
 
 def generate_page(json_info):
-    page = str(uuid.uuid4().hex)
-    doc, tag, text = Doc().tagtext()
-    with tag('html'):
-        with tag('body'):
-            with tag('article'):
-                with tag('h1'):
-                    text(json_info['title'])
-                if json_info.get('comment'):
-                    with tag('p'):
-                        text(json_info['comment'])
-                if json_info.get('photos'):
-                    with tag('slideshow'):
-                        for photo in json_info['photos']:
-                            with tag('figure'):
-                                doc.stag('img', src=photo['url'])
-                                if photo.get('caption'):
-                                    with tag('figcaption'):
-                                        text(photo['caption'])
-                if json_info.get('audios'):
-                    for audio in json_info['audios']:
-                        doc.stag('audio', src=audio['url'])
-    f = open(iv_path + '{}.html'.format(page), mode='w')
-    f.write(doc.getvalue())
-    f.close()
-    return {'ok': True, 'url': 'https://asergey.me/iv/{}.html'.format(page),
-            'iv_url': 'https://t.me/iv?url=https://asergey.me/iv/{}.html&rhash=610fa9e72e9e1a'.format(page)}
+    try:
+        page = str(uuid.uuid4().hex)
+        doc, tag, text = Doc().tagtext()
+        with tag('html'):
+            with tag('body'):
+                with tag('article'):
+                    with tag('h1'):
+                        text(json_info['title'])
+                    if json_info.get('comment'):
+                        with tag('p'):
+                            text(json_info['comment'])
+                    if json_info.get('photos'):
+                        with tag('slideshow'):
+                            for photo in json_info['photos']:
+                                with tag('figure'):
+                                    doc.stag('img', src=photo['url'])
+                                    if photo.get('caption'):
+                                        with tag('figcaption'):
+                                            text(photo['caption'])
+                    if json_info.get('audios'):
+                        for audio in json_info['audios']:
+                            doc.stag('audio', src=audio['url'])
+        f = open(iv_path + '{}.html'.format(page), mode='w')
+        f.write(doc.getvalue())
+        f.close()
+        return {'ok': True, 'url': 'https://asergey.me/iv/{}.html'.format(page),
+                'iv_url': 'https://t.me/iv?url=https://asergey.me/iv/{}.html&rhash=610fa9e72e9e1a'.format(page)}
+    except:
+        return flask.abort(500)
 
 
 @app.errorhandler(401)
