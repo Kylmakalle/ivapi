@@ -1,5 +1,5 @@
 import flask
-from flask import request, Response
+from flask import request, Response, jsonify
 import json
 import uuid
 from yattag import Doc
@@ -82,7 +82,7 @@ def post_request():
             json_info = checkJson(info)
             if json_info:
                 if checkattrs(json_info):
-                    return generate_page(json_info)
+                    return jsonify(generate_page(json_info))
                 else:
                     flask.abort(400)
             else:
