@@ -1,3 +1,6 @@
+> Repository Archived. Further questions on automatization may be proceeded to https://t.me/IVpublic
+
+
 # ivapi
 Simple implementation of Telegram Instant View pages generator
 
